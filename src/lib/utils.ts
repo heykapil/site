@@ -23,3 +23,8 @@ export function stripExtension(f: string) {
 export function isMarkdown(f: string) {
   return f.match(/\.md(x?)$/)
 }
+
+// converts string-like input to a string
+export function stringify(s: string | string[] | undefined): string {
+  return (typeof s === 'string' ? [s] : s ? s : []).join(' ')
+}

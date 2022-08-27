@@ -19,6 +19,8 @@
       "@components/*": ["src/components/*"],
       "@styles/*": ["src/styles/*"],
       "@lib/*": ["src/lib/*"],
+      "@types": ["src/types.d.ts"],
+      "@utils": ["src/lib/utils.ts"],
       "@posts/*": ["src/posts/*"]
     }
   },

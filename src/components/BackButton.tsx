@@ -1,4 +1,4 @@
-import { cc } from '@components/utils'
+import { cc } from '@utils'
 import { ArrowLeftIcon } from '@primer/octicons-react'
 
 export const BackButton = (p: JSX.IntrinsicElements['div']) => {

@@ -3,7 +3,7 @@
   "repo": "https://github.com/nguyenvukhang/uni",
   "github": "https://github.com/nguyenvukhang",
   "paths": {
-    "posts": "src/posts",
+    "posts": "posts",
     "photos": "public/photos"
   }
 }

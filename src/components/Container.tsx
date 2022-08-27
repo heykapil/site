@@ -1,5 +1,5 @@
-import { cc } from '@components/utils'
-import { Children } from './types'
+import { cc } from '@utils'
+import { Children } from '@types'
 
 const Base = (className?: string) => (p: { children?: Children }) =>
   (

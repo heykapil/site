@@ -1,13 +1,13 @@
-import { getAllFiles, getFiles } from '@lib/get-all-files'
+import { getFiles } from '@lib/get-files'
 import { GetStaticProps } from 'next'
 import { NextRouter, useRouter } from 'next/router'
 import { constants } from '@lib/constants'
 import { useEffect, useState } from 'react'
-import { getTime, isMarkdown, stripExtension } from '@components/utils'
+import { getTime, isMarkdown, stripExtension } from '@utils'
 import { SquareIcon } from '@primer/octicons-react'
 import Image from 'next/image'
-import { getPostByFilename } from '@lib/posts'
-import { PostMetadata } from '@components/types'
+import { getPostBySlug } from '@lib/posts'
+import { PostMetadata } from '@types'
 
 type PostMeta = PostMetadata & {
   filename: string
@@ -19,9 +19,9 @@ export const getStaticProps: GetStaticProps = async () => {
    * containing the blog post's contents
    */
   const postsDir = constants.paths.posts
-  const posts = getAllFiles(postsDir).filter(isMarkdown).map(stripExtension)
+  const posts = getFiles(postsDir).filter(isMarkdown).map(stripExtension)
   const postMetadata: PostMeta[] = await Promise.all(
-    posts.map((p) => getPostByFilename(p))
+    posts.map((p) => getPostBySlug(p))
   )
     .then((res) => res.map((m, i) => ({ filename: posts[i], ...m.data })))
     .catch(() => [])

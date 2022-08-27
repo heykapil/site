@@ -1,6 +1,6 @@
-import { stripExtension } from '@components/utils'
+import { stripExtension } from '@utils'
 import { constants } from '@lib/constants'
-import { getFiles } from '@lib/get-all-files'
+import { getFiles } from '@lib/get-files'
 import { readFileSync } from 'fs'
 import { GetStaticProps } from 'next'
 import { resolve } from 'path'
@@ -24,12 +24,9 @@ const Photo = (p: { src: string; meta?: string }) => (
 )
 
 export const getStaticProps: GetStaticProps = async () => {
-  const photos = getFiles(constants.paths.photos).filter(
-    (x) => !x.endsWith('.json')
-  )
-  const meta = JSON.parse(
-    readFileSync(resolve(constants.paths.photos, 'meta.json'), 'utf8')
-  )
+  const dir = constants.paths.photos
+  const photos = getFiles(dir).filter((x) => !x.endsWith('.json'))
+  const meta = JSON.parse(readFileSync(resolve(dir, 'meta.json'), 'utf8'))
   return { props: { photos, meta } }
 }
 

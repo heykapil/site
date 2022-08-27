@@ -1,5 +1,5 @@
-import { cc } from '@components/utils'
-import constants from '@lib/constants.json'
+import { cc } from '@utils'
+import { constants } from '@lib/constants'
 import { TelescopeIcon } from '@primer/octicons-react'
 import { NextRouter } from 'next/router'
 import { BackButton } from './BackButton'
@@ -16,6 +16,7 @@ const Container = (p: JSX.IntrinsicElements['div']) => (
 
 export const Header = (p: { router: NextRouter }) => {
   const { router } = p
+  // root page header
   const RootHeader = () => (
     <div className="flex flex-col mt-12 mb-10">
       <TelescopeIcon size={32} className="fill-gray-400" />
@@ -23,6 +24,7 @@ export const Header = (p: { router: NextRouter }) => {
       <Name className="text-[1.2em] text-gray-900" />
     </div>
   )
+  // non-root header (has a back button to navigate home)
   const NonRootHeader = () => (
     <div className="mt-12 mb-6 flex items-center">
       <BackButton onClick={() => router.replace('/')} />
