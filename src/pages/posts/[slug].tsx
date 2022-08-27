@@ -3,6 +3,7 @@ import { serialize } from 'next-mdx-remote/serialize'
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
 import RSlug from 'remark-slug'
 import RAutoHeadings from 'remark-autolink-headings'
+import RPrism from 'remark-prism'
 import Head from 'next/head'
 import { mdxComponents } from '@components/Mdx'
 import { getPostBySlug } from '@lib/posts'
@@ -10,6 +11,7 @@ import { getFiles } from '@lib/get-files'
 import { constants } from '@lib/constants'
 import { stripExtension } from '@utils'
 import { PostMetadata } from '@types'
+import { TelescopeIcon } from '@primer/octicons-react'
 
 type API = { metadata?: PostMetadata; markdown?: MDXRemoteSerializeResult }
 type Params = { slug: string }
@@ -39,7 +41,10 @@ export const getStaticProps: GetStaticProps<API, Params> = async (p) => {
   // capabilities from remark/rehype plugins
   const markdown = getPost.then(({ content }) =>
     serialize(content, {
-      mdxOptions: { remarkPlugins: [RSlug, RAutoHeadings], rehypePlugins: [] },
+      mdxOptions: {
+        remarkPlugins: [RSlug, RAutoHeadings, RPrism],
+        rehypePlugins: [],
+      },
     })
   )
 
@@ -68,6 +73,9 @@ export default function Post(p: API) {
       </Head>
       <PostHead {...metadata} />
       <MDXRemote {...markdown} components={mdxComponents} lazy />
+      <div className="flex justify-center mt-16 mb-24">
+        <TelescopeIcon  className='fill-gray-500'/>
+      </div>
     </>
   ) : null
 }

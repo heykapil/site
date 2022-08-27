@@ -99,7 +99,7 @@ const About = () => {
     <>
       <p>An efficiency junkie who also happens to write code and do sports.</p>
       <p>
-        Currently piecing togther a degree at National University of Singapore,
+        Currently piecing together a degree at National University of Singapore,
         where it's {getTime(date)}.
       </p>
     </>

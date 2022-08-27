@@ -5,6 +5,7 @@ import { Header } from '@components/Header'
 import '@styles/global.css'
 import '@styles/fonts.css'
 import '@styles/markdown.css'
+import '@styles/prism.css'
 
 export default (A: AppProps) => {
   const r = useRouter()
