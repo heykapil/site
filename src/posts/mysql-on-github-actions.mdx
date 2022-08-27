@@ -1,0 +1,271 @@
+---
+title: 'Running MySQL on GitHub Actions'
+publishedAt: '2022-05-13'
+summary: 'Using CI with database functions testing'
+tags: [mysql, github, continuous integration]
+---
+
+I'm currently working on a project that relies heavily on a relational
+database, and so I've found myself having to pick up MySQL in a short
+span of time.
+
+With that level of reliance also comes a minimum requirement of a
+level of certainty that base-level code is correct, and so unit tests
+was the obvious thing to write together with those base functions.
+
+Local tests were easy enough; most things I could solve in a
+once-and-for-all way by running a system command to fix a local MySQL
+configuration or just add a script to the project. However, getting a
+MySQL instance to run server-side GitHub Actions took me far longer than
+whatever I've done locally, and so that's why I'm staying up an extra
+hour to write this quick guide so the next person doing the exact same
+thing doesn't have to go through the 50-odd failed GitHub Action runs
+I had to sit through.
+
+So let's get into it.
+
+I know this might be skipping too far ahead, but this is my entire
+working workflow file. I'll break it down and go through each bit:
+
+* [Triggers](#triggers)
+* [Environment variables](#environment-variables)
+* [Commands](#commands)
+* [Getting MySQL to work](#getting-mysql-to-work)
+
+<details open>
+
+<summary>Full working yaml file (this goes into
+<code>.github/workflows/cool-name.yml</code>)</summary>
+
+```yaml
+on:
+  push:
+    branches:
+      - master
+      - dev
+
+env:
+  MYSQL_DATABASE: test_db
+  DB_USER: root
+  DB_PASSWORD: root
+  RESTORE: .test.sql
+
+jobs:
+  check-database-package-json-scripts:
+    runs-on: ubuntu-20.04
+      
+    steps:
+      - name: 🔥 Initialize MySQL
+        run: sudo systemctl start mysql.service
+      
+      - name: 📌 Initialize first database
+        run: |
+          mysql -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' \
+          -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+
+      - name: 🚀 Boost user
+        run: |
+          mysql -e "ALTER USER '${{ env.DB_USER }}'@'localhost' \
+          IDENTIFIED WITH mysql_native_password BY 'root';" \
+          -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+
+      - name: 🍺 Check out repository code
+        uses: actions/checkout@v3
+
+      - name: 🧶 Install yarn
+        run: yarn install --frozen-lockfile
+
+      - name: 📦 run tests
+        working-directory: ./packages/database
+        run: |
+          MYSQL_RESTORE_SOURCE=$RESTORE \
+          MYSQL_USERNAME=$DB_USER \
+          MYSQL_PASSWORD=$DB_PASSWORD \
+          MYSQL_ACTIVE_DATABASE=$MYSQL_DATABASE \
+          yarn test
+```
+
+</details>
+
+Don't mind the emojis - those are customary in GitHub Actions by now.
+
+# Triggers
+
+```yaml
+on:
+  push:
+    branches:
+      - master
+      - dev
+```
+
+These define when the entire workflow file is run. Here, it's ran
+after every time someone pushes to branches `master` or `dev`.
+
+Note that for it to work as expected it must exist on both the
+`master` and `dev` branch.
+
+# Environment variables
+
+```yaml
+env:
+  MYSQL_DATABASE: test_db
+  DB_USER: root
+  DB_PASSWORD: root
+  RESTORE: .test.sql
+```
+
+These are just like variables in a programming language. They store
+values and can be used again later.
+
+To refer to the environment variable `DB_USER`, we use `${{
+env.DB_USER }}` in our later code.
+
+# Commands
+
+```yaml
+jobs:
+  check-database-package-json-scripts:
+    runs-on: ubuntu-20.04
+      
+    steps:
+      - name: 🔥 Initialize MySQL
+        run: sudo systemctl start mysql.service
+      
+      - name: 📌 Initialize first database
+        run: |
+          mysql -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' \
+          -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+
+      - name: 🚀 Boost user
+        run: |
+          mysql -e "ALTER USER '${{ env.DB_USER }}'@'localhost' \
+          IDENTIFIED WITH mysql_native_password BY 'root';" \
+          -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+
+      - name: 🍺 Check out repository code
+        uses: actions/checkout@v3
+
+      - name: 🧶 Install yarn
+        run: yarn install --frozen-lockfile
+
+      - name: 📦 run tests
+        working-directory: ./packages/database
+        run: |
+          MYSQL_RESTORE_SOURCE=$RESTORE \
+          MYSQL_USERNAME=$DB_USER \
+          MYSQL_PASSWORD=$DB_PASSWORD \
+          MYSQL_ACTIVE_DATABASE=$MYSQL_DATABASE \
+          yarn test
+```
+
+#### Jobs
+
+Here, `jobs` is a keyword that tells the workflow handler to execute
+the following lines of code.
+
+`check-database-package-json-scripts` is a name that I chose, to label
+the group of `steps` that will be ran under it.
+
+###### Runs-On
+
+`runs-on` is a keyword that specifies to GitHub Actions what operating
+system you'd like to run the workflow on. Here, I've chosen to run it
+with Ubuntu 20.04 (an operating system much like MacOS and Windows,
+only more modular).
+
+#### Steps
+
+For each bullet point under steps, the contents of `run` will be
+executed. The `name` is arbitrarily chosen.
+
+`uses` is a keyword that is immediately followed by a published action
+name. So for example the line that says
+
+```yaml
+      - name: 🍺 Check out repository code
+        uses: actions/checkout@v3
+```
+
+will be running borrowed code from the published package [GitHub
+Checkout][github-checkout].
+
+And finally `working-directory` is a keyword that specifies, relative
+to the root of your project, where you want to `run` a command from.
+
+# Getting MySQL to work
+
+So for the first `step`:
+
+```yaml
+      - name: 🔥 Initialize MySQL
+        run: sudo systemctl start mysql.service
+```
+
+I'm starting the MySQL service/daemon. You can have a look at GitHub's
+own [Virtual Environment documentation][github-venv]. There, they
+record all the available operating systems and their respective
+pre-installed apps.
+
+
+On Ubuntu 20.04 (my workflow [operating system of choice](#runs-on)),
+MySQL does come pre-_installed_, but it doesn't come
+pre-_enabled_. Quoting from [GitHub's docs][github-ubuntu]:
+
+> MySQL service is disabled by default. Use the following command as a
+> part of your job to start the service: `sudo systemctl start
+> mysql.service`
+
+The next `step`:
+
+```yaml
+      - name: 📌 Initialize first database
+        run: |
+          mysql -e 'CREATE DATABASE ${{ env.MYSQL_DATABASE }};' \
+          -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+```
+
+is a measure I took in case the code I want to test is not resilient
+enough to handle initializing a new database on MySQL.
+
+Then the last MySQL-related step:
+
+```yaml
+      - name: 🚀 Boost user
+        run: |
+          mysql -e "ALTER USER '${{ env.DB_USER }}'@'localhost' \
+          IDENTIFIED WITH mysql_native_password BY 'root';" \
+          -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+```
+
+Is to allow all following code that uses the existing  credentials to
+freely manipulate all databases within the MySQL instance.
+
+A for-instance is that if you tried to import a `.sql` file into your
+database with this shell command
+
+```shell
+mysql -u root -p"root" test_do < some_file.sql
+```
+
+Then it will complain with some [cryptic error][stackoverflow] that's
+unrelated to how it's meant to be solved.
+
+# End
+
+And yeah. That pretty much sums up how to run a MySQL instance on
+GitHub Actions. If you'd like to get a full picture of what's going
+on, such as what tests I run with the last `step`, head over to the
+[project's repository](https://github.com/modtree/modtree).
+
+Notably, here's a [direct link][yaml] to the discussed yaml file.
+
+If you've any questions at all related to this subject, please shoot
+me an email at [brew4k@gmail.com](mailto:brew4k@gmail.com). I'll be
+glad to see how I can help.
+
+[github-venv]: https://github.com/actions/virtual-environments
+[github-ubuntu]: https://github.com/actions/virtual-environments/blob/78d8bca4d39f7b8be4449f1c331dc66532e9d2b1/images/linux/Ubuntu2004-Readme.md
+[github-checkout]: https://github.com/marketplace/actions/checkout
+[stackoverflow]: https://stackoverflow.com/questions/50093144/mysql-8-0-client-does-not-support-authentication-protocol-requested-by-server
+[yaml]: https://github.com/modtree/modtree/blob/280e0be9a31e82bd0191b91f079133312a600768/.github/workflows/database-package-scripts.yml

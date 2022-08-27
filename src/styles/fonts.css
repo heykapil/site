@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Readex+Pro&display=swap');
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @apply font-readex;
+}

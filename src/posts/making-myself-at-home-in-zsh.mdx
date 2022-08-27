@@ -1,0 +1,147 @@
+---
+title: 'Making zsh feel like home'
+publishedAt: '2021-09-23'
+summary: 'Slipping and sliding in the command line'
+tags: [shell]
+---
+
+The thing that greets you when you open the terminal is the shell.
+
+```
+% █
+```
+
+macOS used to ship with [bash](<https://en.wikipedia.org/wiki/Bash_(Unix_shell)>)
+as the default shell, until in [WWDC
+2019](https://www.theverge.com/2019/6/4/18651872/apple-macos-catalina-zsh-bash-shell-replacement-features)
+it was announced that [zsh](https://en.wikipedia.org/wiki/Z_shell) will replace
+it as the default shell.
+
+The following snippets can either be placed inside `~/.zshrc` or be ran directly
+in the z shell as commands. If you edit `~/.zshrc`, for changes to take effect
+you need to either exit and reopen the terminal, or run the command `source ~/.zshrc`.
+
+# Aliases
+
+For things you find yourself typing all the time.
+
+```bash
+alias zr="source ~/.zshrc"
+```
+
+After running this command, you can now type `zr` and press enter and zsh would
+interpret that as if you typed `source ~/.zshrc` and pressed enter.
+
+Aliases can also save you a lot more keystrokes:
+
+```bash
+alias ls="ls -a --group-directories-first --color=always"
+alias ll="ls -al --group-directories-first --color=always"
+```
+
+# Functions
+
+Sometimes the one-liner nature of alias isn't enough. Or sometimes you want to
+add things after the command (arguments). Functions are perfect for this.
+
+First of all, functions can be used just like aliases, so the alias of `zr` is
+equivalent to this function:
+
+```bash
+function zr() {
+  source ~/.zshrc
+}
+```
+
+To pass an argument into a function, do this:
+
+```bash
+function p() {
+  echo $1
+}
+```
+
+The number denotes the order of the argument given. `$1` will refer to the first
+argument, `$2` will refer to the second, and so on.
+
+So if you were to run the command `p helloworld`, zsh will print out
+`helloworld`, as if you typed in `echo helloworld`.
+
+With functions you can also bring in logic like if-else statements, for example:
+
+```bash
+function gcm() {
+  if [ "$1" ]; then
+    git commit -m $1
+  else
+    git commit
+  fi
+}
+```
+
+# Environment variables
+
+Variables are called by pre-pending the `$` symbol.
+
+```
+FOO="bar"
+echo $F00
+```
+
+Running the two commands above, you would have assigned `"bar"` to the variable
+`FOO`, and the terminal will print `bar`.
+
+Some environment variables are defined by default. One such example is `$HOME`.
+
+```
+echo $HOME
+```
+
+will print the current user's home directory. For example, mine prints
+`/home/khang`.
+
+Personally, I use these variables to store key locations on my computer, such as
+my main working directory and my configuration directories
+
+```bash
+REPOS="$HOME/repos"
+ZSH_DOTS="$REPOS/zsh"
+```
+
+# Splitting up your zshrc
+
+Now this is the highlight of the article. When writing all these into one file,
+namely `~/.zshrc`, things can get messy, and so it's often better to split it up
+into multiple files.
+
+I do it by putting this into my `~/.zshrc`:
+
+```bash
+ZSH_DOTS="$HOME/repos/zsh"
+sourceDirs=()
+[ `uname` = "Linux" ] && sourceDirs+=(linux)
+[ `uname` = "Darwin" ] && sourceDirs+=(mac)
+sourceDirs+=(core brew)
+
+for d in $sourceDirs[@]; do
+  fs=($(find $ZSH_DOTS/$d -type f))
+  for f in $fs[@]; do
+    source "$f";
+  done
+done
+```
+
+What this does is it finds all the files under the following directories
+
+```bash
+~/repos/zsh/brew
+~/repos/zsh/core
+~/repos/zsh/linux # (only if on Linux)
+~/repos/zsh/mac   # (only if on macOS)
+```
+
+And sources all of them as though they were part of `~/.zshrc`.
+
+This has helped be organize my [zsh
+configurations](https://github.com/nguyenvukhang/zsh) so much better. Probably
+the best thing I've done in zsh in 2021.

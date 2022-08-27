@@ -1,0 +1,105 @@
+---
+title: 'Managing dotfiles'
+publishedAt: '2022-01-01'
+summary: 'Using GNU stow with git to properly organize configs'
+tags: [shell, zsh]
+---
+
+Over the holidays I've decided to give [GNU's stow][stow-home] a real
+try. And I think I'll never go back to my previous setup again. I now
+believe that this is the new best way of managing configuration files.
+
+I used to write shell scripts to manage symlinks so I could store my
+config files in git projects. This was nice because I could track
+progress but after a while it was a lot of mental overhead to remember
+what belongs where.
+
+With stow, here's what my dotfile repository looks like:
+
+```
+.
+├── .gitignore
+├── .gitmodules
+├── nvim
+│  └── .config
+│     └── nvim
+│        ├── init.lua
+│        ├── lua
+│        └── vim
+├── personal
+│  ├── .config
+│  │  └── nvim
+│  │     ├── colors
+│  │     ├── data
+│  │     └── ultisnips
+│  └── .local
+│     └── bin
+└── zsh
+   ├── .zshenv
+   └── .zshrc
+```
+
+Within each folder in the root directory, it's how my entire home
+directory would look like if all I had were config files.
+
+So if I ran
+
+```
+stow --target $HOME nvim
+```
+
+then it will create symlinks required to achieve this file tree:
+
+```
+~
+└── .config
+   └── nvim
+      ├── init.lua
+      ├── lua
+      └── vim
+```
+
+which means that my nvim configs will be installed exactly where they
+need to be.
+
+Well actually with basic symlink management it's not that hard to
+manually achieve this. But here's the awesome thing that stow can do:
+
+If I went on to run
+
+```
+stow --target $HOME personal
+```
+
+then stow will realize that there is a conflict under the
+`~/.config/nvim` folder and automatically manage it, creating this
+file tree:
+
+```
+~
+├── .config
+│  └── nvim
+│     ├── init.lua
+│     ├── lua
+│     ├── vim
+│     ├── colors
+│     ├── data
+│     └── ultisnips
+└── .local
+   └── bin
+```
+
+This is great because now I can store my personal nvim configs outside
+of my public nvim repository, and still have it all install properly
+with stow.
+
+That's how my recent [dots][dots-repo] repository came to be, with an
+extensive use of git submodules to pull configs in from different
+repositories, some public and others private.
+
+For more options and uninstallation, check out [stow's
+documentation][stow-docs].
+
+[stow-home]: https://www.gnu.org/software/stow/
+[stow-docs]: https://www.gnu.org/software/stow/manual/
+[dots-repo]: https://github.com/nguyenvukhang/dots

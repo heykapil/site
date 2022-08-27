@@ -1,0 +1,110 @@
+---
+title: 'Your first vimrc'
+publishedAt: '2021-08-04'
+summary: 'Simple settings to kick start your journey with vim'
+tags: [vim]
+---
+
+Unlike most applications with a graphical settings menu, vim's settings are configured inside of a **vimrc** file. But where do you find/put this file?
+
+If you're in neovim, you can drop it in `~/.config/nvim/init.vim`
+And if you're in regular vim, you can place it in `~/.vim/vimrc/`
+
+This is my [vimrc](https://github.com/nguyenvukhang/neovim/blob/master/init.vim). But for this discussion I'll be focusing on configuring vim from its original state.
+
+1. [Tab length](#tab-length)
+2. [Line wrap](#line-wrap)
+3. [Relative line numbers](#relative-line-numbers)
+4. [Word search](#word-search)
+5. [Undo](#undo)
+6. [Others](#others)
+
+### Tab length
+
+```
+set tabstop=2
+set softtabstop=2
+set expandtab
+set shiftwidth=2
+```
+
+The default tab length in vim is 8. Yes, 8. That can be a little rough, so I prefer to set it to just 2. Some people prefer 4 but I feel that it eats up my coding screen width a little too fast as I indent.
+
+### Line wrap
+
+```
+set wrap linebreak
+set breakindent
+```
+
+`set wrap`does what it says. `set linebreak` makes sure that the line break doesn't chop any word in half as it wraps. `set breakindent` makes wrapped lines start at the same indent as the original line that was broken.
+
+Without breakindent:
+
+```
+Quote: Marcus Aurelius:
+    You have power over
+your mind - not outside
+events. Realize this,
+and you will find
+strength.
+```
+
+With breakindent:
+
+```
+Quote:
+  Marcus Aurelius:
+    You have power over
+    your mind - not
+    outside events.
+    Realize this, and
+    you will find
+    strength.
+```
+
+### Relative line numbers
+
+```
+set relativenumber
+set number
+```
+
+`set relativenumber` makes the line numbers at the left side of vim be relative to your current line number. But this sets your current line number at 0, which is not very useful. `set number` changes this 0 to your actual line number.
+
+### Word search
+
+```
+set incsearch
+set nohlsearch
+```
+
+`set incsearch` highlights results as you type, even before you press enter. `set nohlsearch` removes the highlights immediately after enter is pressed. I prefer things to go back to being clean once I've found what I need.
+
+### Undo
+
+```
+set undofile
+set undodir=~/.config/nvim/undodir
+```
+
+The combination of these options lets you save undos to the beginning of time, as long as you keep the directory set under `set undodir` safe. Your undos will be saved even if you quit vim and come back.
+
+### Others
+
+```
+set termguicolors
+set guicursor=
+set noerrorbells
+set scrolloff=10
+set hidden
+set noswapfile
+set nobackup
+```
+
+`set termguicolors` enables full colors in vim, as opposed to the primitive 16 colors originally available.  
+`set guicursor=` sets the cursor to be a block at all times, rather than switch to a thin line when entering insert mode. I just prefer my cursor to remain as a block.  
+`set noerrorbells` is my path to peace and quiet when coding.  
+`set scrolloff=10` will make the text scroll when my cursor is 10 lines away from the edge. This helps to keep the cursor more centered on the screen.  
+`set hidden` allows me to switch to other files without vim warning me that I haven't saved the file I was previously looking at.  
+`set noswapfile` and `set nobackup` disables vim's auto-backup mechanism, which allows me to avoid seeing a .swp file in my working directory.
