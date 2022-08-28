@@ -14,6 +14,16 @@ export function getTime(d: Date) {
   })
 }
 
+// get DD Mmm YYYY from a date object
+export function getDate(d: Date) {
+  return d.toLocaleDateString('en-sg', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+
 // remove file extension from a path
 export function stripExtension(f: string) {
   return f.replace(new RegExp(extname(f) + '$'), '')

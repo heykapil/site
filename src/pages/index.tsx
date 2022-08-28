@@ -27,7 +27,13 @@ export const getStaticProps: GetStaticProps = async () => {
     .catch(() => [])
 
   return {
-    props: { posts, postMetadata, photos: getFiles(constants.paths.photos) },
+    props: {
+      posts,
+      postMetadata,
+      photos: getFiles(constants.paths.photos).filter(
+        (x) => !x.endsWith('.json')
+      ).reverse(),
+    },
   }
 }
 
@@ -67,8 +73,7 @@ const Posts = (p: {
   )
 }
 
-const Photos = (p: { router: NextRouter }) => {
-  const pinned = ['golf.jpg', 'hcanoe.jpg', 'njcc.jpg', '6F.jpg']
+const Photos = (p: { router: NextRouter; photos: string[] }) => {
   const r = p.router
   const Photo = (p: { src: string }) => (
     <div
@@ -81,7 +86,7 @@ const Photos = (p: { router: NextRouter }) => {
   return (
     <div className="flex overflow-x-scroll h-56 pt-1">
       <div className="flex flex-nowrap space-x-4">
-        {pinned.map((f, i) => (
+        {p.photos.slice(0, 4).map((f, i) => (
           <Photo key={i} src={f} />
         ))}
       </div>
@@ -137,7 +142,7 @@ export default function App(p: {
             All photos
           </a>
         </div>
-        <Photos router={r} />
+        <Photos router={r} photos={p.photos} />
       </Chunk>
       <Chunk>
         <H1>Posts</H1>
