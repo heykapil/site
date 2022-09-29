@@ -30,9 +30,9 @@ export const getStaticProps: GetStaticProps = async () => {
     props: {
       posts,
       postMetadata,
-      photos: getFiles(constants.paths.photos).filter(
-        (x) => !x.endsWith('.json')
-      ).reverse(),
+      photos: getFiles(constants.paths.photos)
+        .filter((x) => !x.endsWith('.json'))
+        .reverse(),
     },
   }
 }
@@ -100,6 +100,9 @@ const About = () => {
     const t = setTimeout(() => setDate(new Date()), 1000)
     return () => clearTimeout(t)
   })
+  const github = () => <a href="https://github.com/nguyenvukhang">GitHub</a>
+  const instagram = () => <a href="https://www.instagram.com/nguyenvukhang_">Instagram</a>
+  const cv = () => <a href="https://read.cv/nguyenvukhang">CV</a>
   return (
     <>
       <p>An efficiency junkie who also happens to write code and do sports.</p>
@@ -107,6 +110,7 @@ const About = () => {
         Currently piecing together a degree at National University of Singapore,
         where it's {getTime(date)}.
       </p>
+      <p>I also hang out on {instagram()} and {github()}. Here's my {cv()}.</p>
     </>
   )
 }
