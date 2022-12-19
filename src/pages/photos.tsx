@@ -12,16 +12,18 @@ const Photo = (p: { src: string; meta?: string }) => {
     <div className="w-full mb-12">
       <div className="block w-full">
         <Image
+          style={{ objectFit: 'cover', width: '100vw' }}
+          alt="photo"
           src={'/photos/' + p.src}
-          width={700} // will be overridden by layout="responsive"
-          height={475} // will be overridden by layout="responsive"
-          objectFit="cover"
-          layout="responsive"
+          width={700} // will be overridden by `style` prop
+          height={475} // will be overridden by `style` prop
         />
       </div>
       <div className="flex flex-col items-center">
         <h2 className="text-lg">{p.meta ? p.meta : 'A cool photo.'}</h2>
-        {date ? <span className="text-sm text-gray-500">{getDate(date)}</span> : null}
+        {date ? (
+          <span className="text-sm text-gray-500">{getDate(date)}</span>
+        ) : null}
       </div>
     </div>
   )
